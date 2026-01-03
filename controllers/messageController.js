@@ -2,7 +2,8 @@ const ScheduledMessage = require('../models/ScheduledMessage');
 const MessageTemplate = require('../models/MessageTemplate');
 const User = require('../models/User');
 const { processTemplate } = require('../helpers/templateProcessor');
-const twilio = require('twilio')(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
+const { sendScheduledMessage } = require('../helpers/messageScheduler');
+const twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
 // POST /api/messages/send
 exports.sendMessage = async (req, res) => {
@@ -50,60 +51,24 @@ exports.sendMessage = async (req, res) => {
 
     await scheduledMessage.save();
 
-    const sendMessages = async () => {
-      const results = [];
-      let allSuccessful = true;
-      for (const user of users) {
-        try {
-          if (user.optOut) {
-            results.push({ phone: user, status: 'skipped', error: 'User has opted out' });
-            continue;
-          }
-
-          await twilio.messages.create({
-            body: finalMessage,
-            from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
-            to: `whatsapp:${user}`
-          });
-
-          results.push({ phone: user.phone, status: 'sent' });
-          await User.findByIdAndUpdate(user._id, { lastInteraction: new Date() });
-
-        } catch (err) {
-          console.error(`Error sending message to ${user.phone}:`, err);
-          results.push({ phone: user.phone, status: 'failed', error: err.message });
-          allSuccessful = false;
-        }
-
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-
-      await ScheduledMessage.findByIdAndUpdate(scheduledMessage._id, {
-        status: allSuccessful ? 'sent' : 'failed',
-        results,
-        completedAt: new Date()
-      });
-
-      console.log(`Campaign ${campaign || 'general'} completed with ${results.length} messages`);
-    };
-
-    if (scheduleDate > new Date()) {
-      const delay = scheduleDate.getTime() - Date.now();
-      console.log(`संदेश निर्धारित किया गया: ${scheduleDate.toISOString()}`);
-      setTimeout(sendMessages, delay);
-      return res.json({
-        status: 'scheduled',
-        scheduledAt: scheduleDate,
-        messageId: scheduledMessage._id,
-        targetAudience: audience || 'all',
-        estimatedRecipients: users.length,
-        message: 'संदेश सफलतापूर्वक निर्धारित किया गया'
-      });
+    // If scheduled for now or past, send immediately
+    if (scheduleDate <= new Date()) {
+      // Send immediately using the scheduler function
+      await sendScheduledMessage(scheduledMessage);
+      const updated = await ScheduledMessage.findById(scheduledMessage._id);
+      return res.json({ ...updated.toObject(), message: 'संदेश सफलतापूर्वक भेजा गया' });
     }
 
-    await sendMessages();
-    const updated = await ScheduledMessage.findById(scheduledMessage._id);
-    res.json({ ...updated.toObject(), message: 'संदेश सफलतापूर्वक भेजा गया' });
+    // Future messages will be picked up by the cron-based scheduler
+    console.log(`संदेश निर्धारित किया गया: ${scheduleDate.toISOString()}`);
+    return res.json({
+      status: 'scheduled',
+      scheduledAt: scheduleDate,
+      messageId: scheduledMessage._id,
+      targetAudience: audience || 'all',
+      estimatedRecipients: users.length,
+      message: 'संदेश सफलतापूर्वक निर्धारित किया गया'
+    });
 
   } catch (error) {
     console.error('संदेश निर्धारित करने में त्रुटि:', error);

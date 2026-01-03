@@ -6,7 +6,8 @@ const { sendWhatsAppMessage } = require('./whatsappSender');
 const { generatePdf } = require('./generatePdf');
 
 function scheduleDailyNotifications() {
-  nodeCron.schedule('20 7 * * *', async () => {
+  // Run at 6:00 AM IST every day
+  nodeCron.schedule('0 6 * * *', async () => {
     try {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -36,6 +37,8 @@ function scheduleDailyNotifications() {
     scheduled: true,
     timezone: "Asia/Kolkata"
   });
+  
+  console.log('\x1b[32m%s\x1b[0m', '✓ Daily notifications scheduled for 6:00 AM IST');
 }
 
 
@@ -56,25 +59,44 @@ async function sendReminder(event) {
   }
 }
 
-// Schedule reminders for events one hour before they start
-async function scheduleEventReminders() {
-  const now = new Date();
-  const nextHourMark = new Date(now.getTime() + 60 * 60 * 1000);
+// Schedule reminders using cron - checks every 5 minutes for events starting in the next hour
+function scheduleEventReminders() {
+  // Run every 5 minutes to check for upcoming events
+  nodeCron.schedule('*/5 * * * *', async () => {
+    try {
+      const now = new Date();
+      const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
+      const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
 
-  // Find the next event needing a reminder
-  const nextEvent = await Event.findOne({
-    date: { $gte: nextHourMark },
-    reminderSent: false,
-    status: 'confirmed',
-  }).sort({ date: 1 });
+      // Find events that:
+      // 1. Start within the next hour (but more than 55 minutes away to avoid duplicates)
+      // 2. Haven't had a reminder sent
+      // 3. Are confirmed
+      const upcomingEvents = await Event.find({
+        date: { 
+          $gte: new Date(now.getTime() + 55 * 60 * 1000), // At least 55 min from now
+          $lte: oneHourFromNow // But within an hour
+        },
+        reminderSent: false,
+        status: 'confirmed',
+      });
 
-  if (nextEvent) {
-    const delay = nextEvent.date.getTime() - now.getTime() - 60 * 60 * 1000;
-    setTimeout(async () => {
-      await sendReminder(nextEvent);
-      scheduleEventReminders(); // Recursively schedule next reminder
-    }, delay);
-  }
+      for (const event of upcomingEvents) {
+        await sendReminder(event);
+      }
+
+      if (upcomingEvents.length > 0) {
+        console.log(`[${new Date().toISOString()}] Processed ${upcomingEvents.length} event reminders`);
+      }
+    } catch (error) {
+      console.error('[ERROR] Failed to process event reminders:', error.message);
+    }
+  }, {
+    scheduled: true,
+    timezone: "Asia/Kolkata"
+  });
+
+  console.log('\x1b[32m%s\x1b[0m', '✓ Event reminders scheduler started (checking every 5 minutes)');
 }
 // Format events list (example)
 function formatEventList(events) {

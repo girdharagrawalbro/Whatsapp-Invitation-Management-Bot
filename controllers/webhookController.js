@@ -54,7 +54,7 @@ exports.handleWebhook = async (req, res) => {
         // twiml.message(`✅ ${req.body.NumMedia} कार्यक्रम सफलतापूर्वक जोड़े गए !`);
         sendWhatsAppMessage(adminPhone, "", null,
           {
-            templateSid: 'HXbe93f8fd9e544d85a0fbe12186c5c6f5', // Your approved template SID
+            templateSid: process.env.TWILIO_TEMPLATE_SID, // Approved template SID from env
           }
         )
       } else if (text.trim()) {
@@ -67,7 +67,7 @@ exports.handleWebhook = async (req, res) => {
           }
           sendWhatsAppMessage(adminPhone, "", null,
             {
-              templateSid: 'HXbe93f8fd9e544d85a0fbe12186c5c6f5', // Your approved template SID
+              templateSid: process.env.TWILIO_TEMPLATE_SID, // Approved template SID from env
             }
           )
         } else {
