@@ -1,7 +1,9 @@
 # Node.js
 whatsapp-bot/node_modules/
+backend/node_modules/
 /node_modules/
-whatsapp-bot/node_modules/
+admin-backend/node_modules/
+whatsapp-admin/node_modules/
 whatsapp-bot/.env
 
 # Logs

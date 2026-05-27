@@ -1,198 +1,137 @@
 import { NavLink } from 'react-router-dom'
 import { useState } from 'react'
+import { useAuth } from '../lib/AuthContext'
+import {
+  LayoutDashboard,
+  MessageSquare,
+  CalendarClock,
+  Users,
+  Megaphone,
+  FileText,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  LogOut,
+  Bot,
+  QrCode
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const { user, logout } = useAuth()
+  
+  // Robust check based on User schema: roles can be 'admin', 'user', or 'superadmin'
+  const role = user?.role || 'user'
+  const isAdmin = role === 'admin' || role === 'superadmin'
 
-  const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed)
-  }
+  const allNavItems = [
+    { 
+      to: '/dashboard', 
+      icon: LayoutDashboard, 
+      text: 'Dashboard', 
+      roles: ['admin', 'user', 'superadmin'] 
+    },
+    { 
+      to: '/scheduledmessage', 
+      icon: CalendarClock, 
+      text: 'My Invitations', 
+      roles: ['admin', 'user', 'superadmin'] 
+    },
+    { 
+      to: '/whatsapp-session', 
+      icon: QrCode, 
+      text: 'WhatsApp Setup', 
+      roles: ['admin', 'user', 'superadmin'] 
+    },
+    { 
+      to: '/settings', 
+      icon: Settings, 
+      text: 'Settings', 
+      roles: ['admin', 'user', 'superadmin'] 
+    }
+  ]
+
+  const navItems = allNavItems.filter(item => item.roles.includes(role))
 
   return (
-    <>
-      <aside
-        className={`${isCollapsed ? 'w-20' : 'w-64'} h-full min-h-screen bg-gray-900 text-white flex flex-col transition-all duration-300 z-50`}
-      >
-        <div className='p-4 border-b border-gray-700 flex justify-between items-center'>
-          {!isCollapsed && (
-            <h1 className='text-2xl font-bold flex items-center gap-2'>
-              <svg
-                xmlns='http://www.w3.org/2000/svg'
-                className='h-6 w-6'
-                fill='none'
-                viewBox='0 0 24 24'
-                stroke='currentColor'
-              >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth={2}
-                  d='M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z'
-                />
-              </svg>
-              Whatsapp Bot
-            </h1>
-          )}
-          {isCollapsed && (
-            <div className='w-full flex justify-center'>
-              <svg
-                xmlns='http://www.w3.org/2000/svg'
-                className='h-6 w-6'
-                fill='none'
-                viewBox='0 0 24 24'
-                stroke='currentColor'
-              >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth={2}
-                  d='M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z'
-                />
-              </svg>
-            </div>
-          )}
-          <button
-            onClick={toggleSidebar}
-            className='text-gray-300 hover:text-white p-1 rounded-md hover:bg-gray-700'
-          >
-            {isCollapsed ? (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-              </svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-              </svg>
-            )}
-          </button>
-        </div>
-        <nav className='flex-1 px-4 py-2 space-y-2'>
-          <NavLink
-            to='/'
-            className={({ isActive }: { isActive: boolean }) =>
-              `flex items-center gap-3 p-3 rounded-lg transition-colors ${isActive
-                ? 'bg-indigo-700 text-white'
-                : 'text-gray-300 hover:bg-gray-800'
-              } ${isCollapsed ? 'justify-center' : ''}`
-            }
-          >
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              className='h-5 w-5'
-              fill='none'
-              viewBox='0 0 24 24'
-              stroke='currentColor'
-            >
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                strokeWidth={2}
-                d='M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'
-              />
-            </svg>
-            {!isCollapsed && 'Dashboard'}
-          </NavLink>
-
-          {/* Other NavLinks with the same pattern */}
-          {[
-            { to: '/messageschedular', icon: 'calendar', text: 'Schedule Message' },
-            { to: '/scheduledmessage', icon: 'calendar', text: 'Scheduled Messages' },
-            { to: '/manageusers', icon: 'users', text: 'Manage Users' },
-            { to: '/manageevents', icon: 'announcement', text: 'Manage Events' },
-            { to: '/templates', icon: 'template', text: 'Template Management' },
-            { to: '/settings', icon: 'settings', text: 'Settings' }
-          ].map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }: { isActive: boolean }) =>
-                `flex items-center gap-3 p-3 rounded-lg transition-colors ${isActive
-                  ? 'bg-indigo-700 text-white'
-                  : 'text-gray-300 hover:bg-gray-800'
-                } ${isCollapsed ? 'justify-center' : ''}`
-              }
-            >
-              <svg
-                xmlns='http://www.w3.org/2000/svg'
-                className='h-5 w-5'
-                fill='none'
-                viewBox='0 0 24 24'
-                stroke='currentColor'
-              >
-                {item.icon === 'calendar' && (
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth={2}
-                    d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'
-                  />
-                )}
-                {item.icon === 'users' && (
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth={2}
-                    d='M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'
-                  />
-                )}
-                {item.icon === 'announcement' && (
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth={2}
-                    d='M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z'
-                  />
-                )}
-                {item.icon === 'template' && (
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth={2}
-                    d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'
-                  />
-                )}
-                {item.icon === 'settings' && (
-                  <>
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={2}
-                      d='M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z'
-                    />
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={2}
-                      d='M15 12a3 3 0 11-6 0 3 3 0 016 0z'
-                    />
-                  </>
-                )}
-              </svg>
-              {!isCollapsed && item.text}
-            </NavLink>
-          ))}
-        </nav>
-        <div className='p-4 border-t border-gray-700'>
-          <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''}`}>
-            <div className='h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center'>
-              <span className='font-medium'>AD</span>
-            </div>
-            {!isCollapsed && (
-              <div>
-                <p className='font-medium'>Admin User</p>
-                <p className='text-xs text-gray-400'>admin@example.com</p>
-              </div>
-            )}
+    <aside
+      className={`relative flex flex-col bg-slate-900 text-slate-300 h-screen transition-all duration-300 border-r border-slate-800 ${isCollapsed ? 'w-20' : 'w-64'
+        }`}
+    >
+      {/* Header */}
+      <div className="h-16 flex items-center px-4 border-b border-slate-800 shrink-0">
+        <div className={`flex items-center gap-3 ${isCollapsed ? 'mx-auto' : ''}`}>
+          <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/20">
+            <Bot className="h-5 w-5 text-white" />
           </div>
+          {!isCollapsed && <span className="font-bold text-white tracking-tight text-lg">Invitely</span>}
         </div>
-      </aside>
-      {/* Add overlay when sidebar is expanded (for mobile) */}
-      {isCollapsed && (
-        <div
-          className=""
-          onClick={toggleSidebar}
-        ></div>
-      )}
-    </>
+      </div>
+
+      {/* Nav Items */}
+      <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
+        <TooltipProvider delayDuration={0}>
+          {navItems.map((item) => (
+            <Tooltip key={item.to} open={isCollapsed ? undefined : false}>
+              <TooltipTrigger asChild>
+                <NavLink
+                  to={item.to}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${isActive
+                      ? 'bg-blue-600/10 text-blue-400 font-medium'
+                      : 'hover:bg-slate-800 hover:text-white'
+                    } ${isCollapsed ? 'justify-center' : ''}`
+                  }
+                >
+                  <item.icon className={`h-5 w-5 shrink-0 ${isCollapsed ? '' : 'group-hover:scale-110 transition-transform'}`} />
+                  {!isCollapsed && <span className="truncate">{item.text}</span>}
+                </NavLink>
+              </TooltipTrigger>
+              <TooltipContent side="right">{item.text}</TooltipContent>
+            </Tooltip>
+          ))}
+        </TooltipProvider>
+      </nav>
+
+      {/* Footer / User Profile */}
+      <div className="p-4 border-t border-slate-800 space-y-4">
+        <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''}`}>
+          <Avatar className="h-9 w-9 ring-2 ring-slate-800">
+            <AvatarImage />
+            <AvatarFallback className="bg-slate-700 text-slate-200 text-xs font-bold uppercase">
+              {user?.name?.[0] || user?.username?.[0] || 'A'}
+            </AvatarFallback>
+          </Avatar>
+          {!isCollapsed && (
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-white truncate">{user?.name || user?.username || 'Admin'}</p>
+              <p className="text-xs text-slate-500 truncate">{user?.email || 'admin@invitely.com'}</p>
+            </div>
+          )}
+        </div>
+
+        {!isCollapsed && (
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-slate-400 hover:text-white hover:bg-slate-800 px-3"
+            onClick={() => logout()}
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign Out
+          </Button>
+        )}
+      </div>
+
+      {/* Toggle Button */}
+      <button
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className="absolute -right-3 top-20 h-6 w-6 bg-slate-800 border border-slate-700 rounded-full flex items-center justify-center text-slate-400 hover:text-white shadow-xl z-50 transition-colors"
+      >
+        {isCollapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
+      </button>
+    </aside>
   )
 }
