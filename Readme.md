@@ -11,7 +11,6 @@ Invitely is a modern, multi-tenant SaaS platform designed to automate the extrac
 - **Automated Reminders**: Intelligent scheduling of reminders (1 hour before events) and daily briefings (6:00 AM IST) powered by BullMQ and Redis.
 
 ### 🏢 Multi-Tenant Dashboard (Admin)
-- **Organization Management**: Secure signup/login for organizations with complete data isolation.
 - **Event Dashboard**: Visualize all extracted events, RSVP statuses, and delivery metrics.
 - **Template Builder**: Create and manage WhatsApp message templates for invitations and reminders.
 - **User Management**: Manage guest lists, link phone numbers, and track individual guest interactions.

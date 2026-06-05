@@ -1,5 +1,6 @@
 const ScheduledMessage = require('../models/ScheduledMessage');
 const MessageTemplate = require('../models/MessageTemplate');
+const User = require('../models/User');
 const { processTemplate } = require('../helpers/templateProcessor');
 const { sendScheduledMessage } = require('../helpers/messageScheduler');
 

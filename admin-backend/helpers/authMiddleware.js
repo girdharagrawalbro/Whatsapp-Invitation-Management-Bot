@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const AdminUser = require('../models/AdminUser');
 
 const authMiddleware = async (req, res, next) => {
   try {
@@ -6,17 +6,17 @@ const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ success: false, error: 'Login required' });
     }
 
-    const user = await User.findById(req.session.userId || req.session.orgId);
-    if (!user) {
+    const adminUser = await AdminUser.findById(req.session.AdminUserId || req.session.orgId);
+    if (!adminUser) {
       req.session.destroy();
-      return res.status(401).json({ success: false, error: 'User not found' });
+      return res.status(401).json({ success: false, error: 'AdminUser not found' });
     }
 
-    if (!user.isActive) {
+    if (!adminUser.isActive) {
       return res.status(403).json({ success: false, error: 'Account is deactivated' });
     }
 
-    req.user = user;
+    req.AdminUser = adminUser;
     next();
   } catch (error) {
     next(error);

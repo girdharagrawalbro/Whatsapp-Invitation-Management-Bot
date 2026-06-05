@@ -32,7 +32,9 @@ app.use((req, res, next) => {
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   'http://localhost:5173',
-  'http://127.0.0.1:5173'
+  'http://127.0.0.1:5173',
+  'http://localhost:5174',
+  'http://127.0.0.1:5174'
 ].filter(Boolean);
 
 const corsOptions = {
@@ -92,25 +94,24 @@ app.use(session({
   }
 }));
 
-const authRoutes = require('./routes/authRoutes');
-
-
+const eventRoutes = require('./routes/eventRoutes');
+const userRoutes = require('./routes/userRoutes');
+const messageRoutes = require('./routes/messageRoutes');
 const templateRoutes = require('./routes/templateRoutes');
-// const pdfRoutes = require('./routes/pdfRoutes');
-// const otpRoutes = require('./routes/otpRoutes');
-// const openwaWebhookRoutes = require('./routes/openwaWebhookRoutes');
-// const openwaRoutes = require('./routes/openwaRoutes');
+const pdfRoutes = require('./routes/pdfRoutes');
+const otpRoutes = require('./routes/otpRoutes');
+const openwaWebhookRoutes = require('./routes/openwaWebhookRoutes');
+const openwaRoutes = require('./routes/openwaRoutes');
 
 app.use(express.json());
-
-app.use('/api/auth', authRoutes);
 app.use('/api/templates', templateRoutes);
-
-// app.use('/api/auth/otp', otpRoutes);
-// app.use('/api/openwa-session', openwaRoutes);
-// app.use('/api/openwa', openwaWebhookRoutes);
-// app.use('/api', messageRoutes);
-// app.use('/api', pdfRoutes);
+app.use('/api/events', eventRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/auth/otp', otpRoutes);
+app.use('/api/openwa-session', openwaRoutes);
+app.use('/api/openwa', openwaWebhookRoutes);
+app.use('/api', messageRoutes);
+app.use('/api', pdfRoutes);
 
 // Error Handling Middleware (must be last)
 app.use(errorHandler);
@@ -118,4 +119,13 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   logger.info(`📡 Server running on port ${PORT}`);
+
+  // Schedulers
+  const { scheduleDailyNotifications, scheduleEventReminders } = require('./helpers/notificationScheduler');
+  const { initializeMessageScheduler } = require('./helpers/messageScheduler');
+
+  scheduleDailyNotifications();
+  scheduleEventReminders();
+  initializeMessageScheduler();
+  require('./workers/mediaWorker');
 });

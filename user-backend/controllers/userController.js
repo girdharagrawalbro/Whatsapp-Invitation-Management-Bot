@@ -1,11 +1,10 @@
 const User = require('../models/User');
 const Message = require('../models/Message');
-const bcrypt = require('bcryptjs');
 
 exports.getAllUsers = async (req, res) => {
   try {
-    const orgId = req.session.orgId;
-    const users = await User.find({ orgId: orgId }).sort({ lastActiveAt: -1 });
+    console.log("Am herer")
+    const users = await User.find().sort({ lastActiveAt: -1 });
     res.json(users);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -14,26 +13,20 @@ exports.getAllUsers = async (req, res) => {
 
 exports.createUser = async (req, res) => {
   try {
-    const { phone, name, type, role, password } = req.body;
+    const { phone, name, type } = req.body;
     const orgId = req.session.orgId;
 
     if (!phone || !/^\d{10,15}$/.test(phone)) {
       return res.status(400).json({ error: 'Invalid phone number' });
     }
 
-    const userData = {
+    const user = new User({
       orgId: orgId,
       phone,
       name,
       lastActiveAt: new Date(),
-      role: role || 'user'
-    };
-
-    if (password) {
-      userData.password = await bcrypt.hash(password, 10);
-    }
-
-    const user = new User(userData);
+      role: 'user'
+    });
 
     await user.save();
     res.status(201).json(user);
@@ -49,16 +42,9 @@ exports.createUser = async (req, res) => {
 exports.updateUser = async (req, res) => {
   try {
     const orgId = req.session.orgId;
-    const { phone, name, role, password } = req.body;
-
-    const updateData = { phone, name, role };
-    if (password) {
-      updateData.password = await bcrypt.hash(password, 10);
-    }
-
     const user = await User.findOneAndUpdate(
       { _id: req.params.id, orgId: orgId },
-      { $set: updateData },
+      req.body,
       { new: true }
     );
 

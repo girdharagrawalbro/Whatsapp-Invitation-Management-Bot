@@ -71,7 +71,7 @@ const updateTemplate = async (req, res) => {
   try {
     const orgId = req.session.orgId;
     const { name, content, category, variables, isActive } = req.body;
-    
+
     const updateData = {
       ...(name && { name }),
       ...(content && { content }),
