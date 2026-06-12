@@ -5,10 +5,18 @@ const {
   createUser,
   updateUser,
   deleteUser,
-  bulkDelete
+  bulkDelete,
+  signup,
+  login,
+  getMe,
+  logout
 } = require('../controllers/userController');
 const authMiddleware = require('../helpers/authMiddleware');
 
+router.post('/signup', signup);
+router.post('/login', login);
+router.post('/logout', authMiddleware, logout);
+router.get('/me', authMiddleware, getMe);
 
 router.get('/', getAllUsers);
 router.post('/', createUser);

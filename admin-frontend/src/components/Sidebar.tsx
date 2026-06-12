@@ -52,6 +52,12 @@ export default function Sidebar() {
       roles: ['admin', 'superadmin']
     },
     {
+      to: '/whatsapp-session',
+      icon: QrCode,
+      text: 'WhatsApp Session',
+      roles: ['admin', 'superadmin']
+    },
+    {
       to: '/settings',
       icon: Settings,
       text: 'Settings',

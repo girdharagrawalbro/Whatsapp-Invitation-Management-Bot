@@ -18,7 +18,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     // Avoid infinite loop if checkAuth fails or if we're already on login page
-    const isAuthCheck = error.config?.url?.includes('/organizations/me');
+    const isAuthCheck = error.config?.url?.includes('/me');
     const isLoginPage = window.location.pathname === '/login';
 
     if (error.response?.status === 401 && !isAuthCheck && !isLoginPage) {

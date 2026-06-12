@@ -28,7 +28,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const checkAuth = async () => {
     try {
-      const response = await api.get('/organizations/me');
+      const response = await api.get('/users/me');
       if (response.data) {
         setIsAuthenticated(true);
         setUser(response.data);
@@ -47,10 +47,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = async (phone: string, password: string, language?: string) => {
     try {
-      const response = await api.post('/organizations/login', { 
-        phone, 
-        password, 
-        language: language?.toLowerCase() 
+      const response = await api.post('/users/login', {
+        phone,
+        password,
+        language: language?.toLowerCase()
       });
       setIsAuthenticated(true);
       setUser(response.data.organization);
@@ -64,12 +64,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signup = async (name: string, phone: string, password: string, language?: string, email?: string) => {
     try {
-      const response = await api.post('/organizations/signup', { 
-        name, 
-        phone, 
-        password, 
+      const response = await api.post('/users/signup', {
+        name,
+        phone,
+        password,
         email,
-        language: language?.toLowerCase() 
+        language: language?.toLowerCase()
       });
       setIsAuthenticated(true);
       setUser(response.data.organization);
@@ -83,7 +83,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = async () => {
     try {
-      await api.post('/organizations/logout');
+      await api.post('/users/logout');
       setIsAuthenticated(false);
       setUser(null);
     } catch (error) {

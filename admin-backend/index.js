@@ -98,8 +98,8 @@ const authRoutes = require('./routes/authRoutes');
 const templateRoutes = require('./routes/templateRoutes');
 // const pdfRoutes = require('./routes/pdfRoutes');
 // const otpRoutes = require('./routes/otpRoutes');
-// const openwaWebhookRoutes = require('./routes/openwaWebhookRoutes');
-// const openwaRoutes = require('./routes/openwaRoutes');
+const openwaWebhookRoutes = require('./routes/openwaWebhookRoutes');
+const openwaRoutes = require('./routes/openwaRoutes');
 
 app.use(express.json());
 
@@ -107,8 +107,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/templates', templateRoutes);
 
 // app.use('/api/auth/otp', otpRoutes);
-// app.use('/api/openwa-session', openwaRoutes);
-// app.use('/api/openwa', openwaWebhookRoutes);
+app.use('/api/openwa-session', openwaRoutes);
+app.use('/api/openwa', openwaWebhookRoutes);
 // app.use('/api', messageRoutes);
 // app.use('/api', pdfRoutes);
 
